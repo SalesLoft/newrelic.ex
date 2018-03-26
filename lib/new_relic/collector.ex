@@ -7,6 +7,8 @@ defmodule NewRelic.Collector do
     GenServer.start_link(@name, [current_time() | @default_state], name: @name)
   end
 
+  def init(args), do: {:ok, args}
+
   def record_value({name, data}, elapsed) do
     GenServer.cast(@name, {:record_value, {name, data}, elapsed})
   end
