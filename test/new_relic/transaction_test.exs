@@ -65,4 +65,19 @@ defmodule NewRelic.TransactionTest do
 
     assert recorded_time == @elapsed
   end
+
+  describe "record_fn" do
+    test "records query time with correct key" do
+      NewRelic.TransactionStore.set(Transaction.start(@name))
+
+      assert Transaction.record_execution_time(fn ->
+        Process.sleep(10)
+        "result"
+      end, Test.Module, "method") == "result"
+
+      [recorded_time] = get_metric_by_key({@name, {Test.Module, "method"}})
+
+      assert_in_delta(recorded_time, 10 * 1000, 2000)
+    end
+  end
 end

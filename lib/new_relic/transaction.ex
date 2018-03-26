@@ -70,6 +70,17 @@ defmodule NewRelic.Transaction do
     record_value!(transaction, {:db, query}, elapsed)
   end
 
+  @spec record_execution_time((() -> any()), atom(), atom() | bitstring()) :: any()
+  def record_execution_time(func, module, method) when is_function(func) and is_atom(module) do
+    {elapsed_time, result} = :timer.tc(func)
+
+    with transaction = %__MODULE__{} <- NewRelic.TransactionStore.get() do
+      record_value!(transaction, {module, method}, elapsed_time)
+    end
+
+    result
+  end
+
   defp record_value!(%__MODULE__{name: name}, data, elapsed) do
     NewRelic.Collector.record_value({name, data}, elapsed)
   end
