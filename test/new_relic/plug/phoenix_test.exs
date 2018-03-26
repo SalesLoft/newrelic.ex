@@ -32,6 +32,11 @@ defmodule NewRelic.Plug.PhoenixTest do
     assert conn.private[:new_relixir_transaction].name == "FakeController#test_action"
   end
 
+  test "it can generate a custom transaction name", %{conn: conn} do
+    conn = NewRelic.Plug.Phoenix.call(conn, [transaction_name_fn: fn conn -> "test" end])
+    assert conn.private[:new_relixir_transaction].name == "test"
+  end
+
   test "it records the elapsed time of the controller action", %{conn: conn} do
     {_, elapsed_time} = :timer.tc(fn() ->
       conn = NewRelic.Plug.Phoenix.call(conn, nil)
