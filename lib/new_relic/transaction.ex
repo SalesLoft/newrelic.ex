@@ -49,6 +49,7 @@ defmodule NewRelic.Transaction do
   """
   @spec finish(t) :: :ok
   def finish(%__MODULE__{start_time: start_time} = transaction) do
+    NewRelic.TransactionStore.clear()
     end_time = :os.timestamp
     elapsed = :timer.now_diff(end_time, start_time)
 

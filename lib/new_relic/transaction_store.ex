@@ -8,4 +8,8 @@ defmodule NewRelic.TransactionStore do
   def get() do
     Process.get(@transaction_key)
   end
+
+  def clear() do
+    Process.delete(@transaction_key)
+  end
 end

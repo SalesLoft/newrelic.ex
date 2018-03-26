@@ -15,6 +15,13 @@ defmodule NewRelic.TransactionTest do
     assert_contains(get_metric_keys(), {@name, :total})
   end
 
+  test "finish clears out process transaction" do
+    transaction = Transaction.start(@name)
+    NewRelic.TransactionStore.set(transaction)
+    Transaction.finish(transaction)
+    assert NewRelic.TransactionStore.get() == nil
+  end
+
   test "finish records accurate elapsed time" do
     {_, elapsed_time} = :timer.tc(fn() ->
       transaction = Transaction.start(@name)
