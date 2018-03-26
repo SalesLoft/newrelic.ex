@@ -58,7 +58,7 @@ defmodule NewRelic.Plug.InstrumentationTest do
   # with transaction
 
   test "instrument_db records accurate elapsed time", %{conn: conn} do
-    {_, elapsed_time} = :timer.tc(fn ->
+    {elapsed_time, :ok} = :timer.tc(fn ->
       Instrumentation.instrument_db(:foo, %Ecto.Query{}, [conn: conn], fn ->
         :ok = :timer.sleep(42)
       end)
