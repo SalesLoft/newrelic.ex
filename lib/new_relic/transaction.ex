@@ -82,6 +82,15 @@ defmodule NewRelic.Transaction do
     result
   end
 
+  @spec record_custom_transaction((() -> any()), bitstring()) :: any()
+  def record_custom_transaction(func, transaction_name) when is_function(func) and is_bitstring(transaction_name) do
+    transaction = NewRelic.Transaction.start(transaction_name)
+    NewRelic.TransactionStore.set(transaction)
+    result = func.()
+    NewRelic.Transaction.finish(transaction)
+    result
+  end
+
   defp record_value!(%__MODULE__{name: name}, data, elapsed) do
     NewRelic.Collector.record_value({name, data}, elapsed)
   end

@@ -87,4 +87,15 @@ defmodule NewRelic.TransactionTest do
       assert_in_delta(recorded_time, 10 * 1000, 2000)
     end
   end
+
+  describe "record_custom_transaction" do
+    test "records the custom transaction" do
+      assert Transaction.record_custom_transaction(fn ->
+        %Transaction{name: "A Test"} = NewRelic.TransactionStore.get()
+        "response"
+      end, "A Test") == "response"
+
+      [_start, _stop, %{{"A Test", :total} => [_time]}, %{}] = NewRelic.Collector.poll()
+    end
+  end
 end
