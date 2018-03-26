@@ -8,8 +8,8 @@ defmodule NewRelic.Plug.PhoenixTest do
 
   setup %{configured: configured} do
     if configured do
-      Application.put_env(:new_relic, :application_name, to_char_list("App Name"))
-      Application.put_env(:new_relic, :license_key, to_char_list("License Key"))
+      Application.put_env(:new_relic, :application_name, to_charlist("App Name"))
+      Application.put_env(:new_relic, :license_key, to_charlist("License Key"))
     else
       Application.delete_env(:new_relic, :application_name)
       Application.delete_env(:new_relic, :license_key)
@@ -33,7 +33,7 @@ defmodule NewRelic.Plug.PhoenixTest do
   end
 
   test "it can generate a custom transaction name", %{conn: conn} do
-    conn = NewRelic.Plug.Phoenix.call(conn, [transaction_name_fn: fn conn -> "test" end])
+    conn = NewRelic.Plug.Phoenix.call(conn, [transaction_name_fn: fn _ -> "test" end])
     assert conn.private[:new_relixir_transaction].name == "test"
   end
 
