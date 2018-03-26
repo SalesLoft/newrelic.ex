@@ -31,9 +31,11 @@ defmodule NewRelic.Plug.Phoenix do
     if NewRelic.configured? do
       name_fn = Keyword.get(config, :transaction_name_fn, &generate_transaction_name/1)
       transaction_name = name_fn.(conn)
+      transaction = NewRelic.Transaction.start(transaction_name)
+      NewRelic.TransactionStore.set(transaction)
 
       conn
-      |> put_private(:new_relixir_transaction, NewRelic.Transaction.start(transaction_name))
+      |> put_private(:new_relixir_transaction, transaction)
       |> register_before_send(fn conn ->
         NewRelic.Transaction.finish(Map.get(conn.private, :new_relixir_transaction))
 

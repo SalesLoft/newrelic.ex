@@ -27,6 +27,12 @@ defmodule NewRelic.Plug.PhoenixTest do
     assert_is_struct(conn.private[:new_relixir_transaction], NewRelic.Transaction)
   end
 
+  test "it assigns a transaction to the process dictionary", %{conn: conn} do
+    conn = NewRelic.Plug.Phoenix.call(conn, nil)
+    assert_is_struct(conn.private[:new_relixir_transaction], NewRelic.Transaction)
+    assert_is_struct(NewRelic.TransactionStore.get(), NewRelic.Transaction)
+  end
+
   test "it generates a transaction name based on controller and action names", %{conn: conn} do
     conn = NewRelic.Plug.Phoenix.call(conn, nil)
     assert conn.private[:new_relixir_transaction].name == "FakeController#test_action"
