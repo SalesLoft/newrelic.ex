@@ -44,7 +44,7 @@ defmodule NewRelic.Plug.Phoenix do
     end
   end
 
-  defp generate_transaction_name(conn) do
+  def generate_transaction_name(conn) do
     module = conn |> controller_module |> Module.split |> List.last
     action = conn |> action_name |> Atom.to_string
     "#{module}##{action}"
