@@ -97,5 +97,15 @@ defmodule NewRelic.TransactionTest do
 
       [_start, _stop, %{{"A Test", :total} => [_time]}, %{}] = NewRelic.Collector.poll()
     end
+
+    test "the custom transaction can be changed in flight" do
+      assert Transaction.record_custom_transaction(fn ->
+        transaction = %Transaction{name: "A Test"} = NewRelic.TransactionStore.get()
+        transaction |> NewRelic.Transaction.update_name("change") |> NewRelic.TransactionStore.set()
+        "response"
+      end, "A Test") == "response"
+
+      [_start, _stop, %{{"change", :total} => [_time]}, %{}] = NewRelic.Collector.poll()
+    end
   end
 end
