@@ -87,6 +87,7 @@ defmodule NewRelic.Transaction do
     transaction = NewRelic.Transaction.start(transaction_name)
     NewRelic.TransactionStore.set(transaction)
     result = func.()
+    transaction = NewRelic.TransactionStore.get()
     NewRelic.Transaction.finish(transaction)
     result
   end
