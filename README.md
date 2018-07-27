@@ -96,7 +96,33 @@ Phoenix application named `MyApp`.
     end
     ```
 
-5.  Update your controllers to pass `conn` as an option to your New Relic repo wrapper:
+    It is also possible to specify a custom transaction name function to provide your
+    transaction name, falling back to the default naming scheme as needed:
+
+    ```elixir
+    defmodule MyApp.Web do
+      def controller do
+        quote do
+          # ...
+          plug(NewRelic.Plug.Phoenix, transaction_name_fn: &MyApp.Web.get_front_transaction_name/1)
+        end
+      end
+
+      def get_front_transaction_name(%{assigns: %{route: route_name}}) do
+        to_string(route_name)
+      end
+
+      # Fallback to the default Plug transaction name
+      def get_front_transaction_name(conn), do: NewRelic.Plug.Phoenix.generate_transaction_name(conn)
+    end
+    ```
+
+5.  Your db calls will automatically be captured inside of any New Relic transaction. However,
+    this only works if the database work is done in the same process as the transaction. This
+    is most likely acceptable, but you may need to instrument database calls across the process
+    boundary. In that case:
+
+    Update your cross-boundary code to pass `conn` as an option to your New Relic repo wrapper:
 
     ```elixir
     # web/controllers/users.ex
@@ -105,11 +131,27 @@ Phoenix application named `MyApp`.
       use MyApp.Web, :controller
 
       def index(conn, _params) do
-        users = Repo.all(User, conn: conn) # Replaces `Repo.all(User)`
+        users = UserProcess.all(User, conn: conn) # UserProcess is a separate process that fetches Users
         # ...
       end
     end
     ```
+
+### Instrumenting Arbitrary Transactions
+
+It is possible to add New Relic transaction monitoring to any part of your application.
+This can be useful to place inside of background workers, channels, or message processors.
+In order to do so, wrap your code inside of a function and pass it to
+`NewRelic.Transaction.record_custom_transaction`:
+
+```elixir
+NewRelic.Transaction.record_custom_transaction(
+  fn ->
+    my_custom_code
+  end,
+  "MyCustom.TransactionName"
+)
+```
 
 ### Instrumenting Custom Repo Methods
 
