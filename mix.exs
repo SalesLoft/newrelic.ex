@@ -3,7 +3,7 @@ defmodule NewRelic.Mixfile do
 
   def project do
     [app: :new_relic,
-     version: "0.2.1",
+     version: "0.3.0",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -32,7 +32,7 @@ defmodule NewRelic.Mixfile do
     [{:phoenix, "~> 1.2"},
      {:ecto, ">= 1.1.0"},
      {:lhttpc, "~> 1.4"},
-     {:poison, "~> 2.2.0"},
+     {:poison, "~> 2.2 or ~> 3.0"},
      {:ex_doc, ">= 0.0.0", only: :dev}]
   end
 
