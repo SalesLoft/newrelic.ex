@@ -39,13 +39,13 @@ defmodule NewRelic.Agent do
     url = url(collector, [method: :connect])
 
     data = [%{
-      :agent_version => "1.5.0.103",
+      :agent_version => agent_version(),
       :app_name => [app_name()],
       :host => l2b(hostname),
       :identifier => app_name(),
       :pid => l2i(:os.getpid()),
       :environment => [],
-      :language => Application.get_env(:new_relic, :language, "python"),
+      :language => Application.get_env(:new_relic, :language, "elixir"),
       :settings => %{}
     }]
 
@@ -114,7 +114,7 @@ defmodule NewRelic.Agent do
   end
 
   def request(url, body \\ "[]") do
-    :lhttpc.request(url, :post, [{"Content-Encoding", "identity"}], body, 5000)
+    :lhttpc.request(url, :post, [{"User-Agent", "NewRelic-ElixirAgent/#{agent_version()}"}], body, 5000)
   end
 
   def url(args) do
@@ -138,4 +138,7 @@ defmodule NewRelic.Agent do
 
   defp url_var({key, value}), do: [to_string(key), "=", to_string(value)]
 
+  defp agent_version()
+    Application.get_env(:new_relic, :agent_version, "1.10.0")
+  end
 end
