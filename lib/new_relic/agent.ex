@@ -138,7 +138,7 @@ defmodule NewRelic.Agent do
 
   defp url_var({key, value}), do: [to_string(key), "=", to_string(value)]
 
-  defp agent_version()
+  defp agent_version() do
     Application.get_env(:new_relic, :agent_version, "1.10.0")
   end
 end
