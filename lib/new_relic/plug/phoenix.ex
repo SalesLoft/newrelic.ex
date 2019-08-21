@@ -18,8 +18,6 @@ defmodule NewRelic.Plug.Phoenix do
   """
 
   @behaviour Elixir.Plug
-  import Elixir.Phoenix.Controller
-  import Elixir.Plug.Conn
 
   def init(opts) do
     opts
@@ -35,8 +33,8 @@ defmodule NewRelic.Plug.Phoenix do
       NewRelic.TransactionStore.set(transaction)
 
       conn
-      |> put_private(:new_relixir_transaction, transaction)
-      |> register_before_send(fn conn ->
+      |> Plug.Conn.put_private(:new_relixir_transaction, transaction)
+      |> Plug.Conn.register_before_send(fn conn ->
         NewRelic.Transaction.finish(Map.get(conn.private, :new_relixir_transaction))
 
         conn
@@ -47,8 +45,8 @@ defmodule NewRelic.Plug.Phoenix do
   end
 
   def generate_transaction_name(conn) do
-    module = conn |> controller_module |> Module.split |> List.last
-    action = conn |> action_name |> Atom.to_string
+    module = conn |> Phoenix.Controller.controller_module |> Module.split |> List.last
+    action = conn |> Phoenix.Controller.action_name |> Atom.to_string
     "#{module}##{action}"
   end
 end
