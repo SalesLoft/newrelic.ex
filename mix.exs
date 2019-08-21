@@ -24,7 +24,7 @@ defmodule NewRelic.Mixfile do
   defp deps do
     [
       {:phoenix, "~> 1.2", optional: true},
-      {:ecto, ">= 2.0.0", optional: true},
+      {:ecto, ">= 2.0.0"},
       {:lhttpc, "~> 1.4"},
       {:poison, ">= 2.0.0"},
       {:ex_doc, "~> 0.19", only: :dev}
