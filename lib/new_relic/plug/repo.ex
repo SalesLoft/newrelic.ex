@@ -140,6 +140,14 @@ defmodule NewRelic.Plug.Repo do
         end)
       end
 
+      @spec insert_all(Ecto.Schema.t(), [map() | Keyword.t()], Keyword.t()) ::
+              {integer(), nil | [term()]} | no_return
+      def insert_all(schema_or_source, entries, opts \\ []) do
+        instrument_db(:insert_all, schema_or_source, opts, fn ->
+          @repo.insert_all(schema_or_source, entries, opts)
+        end)
+      end
+
       @spec update!(Ecto.Schema.t(), Keyword.t()) :: Ecto.Schema.t() | no_return
       def update!(model, opts \\ []) do
         instrument_db(:update!, model, opts, fn ->
@@ -151,6 +159,14 @@ defmodule NewRelic.Plug.Repo do
       def insert_or_update!(changeset, opts \\ []) do
         instrument_db(:insert_or_update!, changeset, opts, fn ->
           @repo.insert_or_update!(changeset, opts)
+        end)
+      end
+
+      @spec aggregate(Ecto.Queryable.t(), :avg | :count | :max | :min | :sum, atom, Keyword.t()) ::
+              term | nil
+      def aggregate(queryable, aggregate, field, opts \\ []) do
+        instrument_db(:aggregate, queryable, opts, fn ->
+          @repo.aggregate(queryable, aggregate, field, opts)
         end)
       end
 
@@ -167,6 +183,11 @@ defmodule NewRelic.Plug.Repo do
         instrument_db(:preload, model_or_models, opts, fn ->
           @repo.preload(model_or_models, preloads)
         end)
+      end
+
+      @spec in_transaction?() :: boolean()
+      def in_transaction? do
+        @repo.in_transaction?()
       end
     end
   end

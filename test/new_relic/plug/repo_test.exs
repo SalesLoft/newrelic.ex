@@ -56,7 +56,7 @@ defmodule NewRelic.Plug.RepoTest do
       record_call(:update_all, [queryable, updates, Keyword.delete(opts, :conn)])
     end
 
-    def insert_all(queryable, entries, opts) do
+    def insert_all(queryable, entries, opts \\ []) do
       record_call(:insert_all, [queryable, entries, Keyword.delete(opts, :conn)])
     end
 
@@ -100,8 +100,8 @@ defmodule NewRelic.Plug.RepoTest do
       record_call(:delete!, [model, Keyword.delete(opts, :conn)])
     end
 
-    def preload(struct_or_structs, preloads, opts \\ []) do
-      record_call(:preload, [struct_or_structs, preloads, Keyword.delete(opts, :conn)])
+    def preload(model_or_models, preloads, opts \\ []) do
+      record_call(:preload, [model_or_models, preloads, Keyword.delete(opts, :conn)])
     end
 
     def __adapter__ do
@@ -275,6 +275,24 @@ defmodule NewRelic.Plug.RepoTest do
       end)
 
     [recorded_time | _] = get_metric_by_key({@transaction_name, {:db, "FakeModel.one!"}})
+    assert_between(recorded_time, sleep_time, elapsed_time)
+  end
+
+  # insert_all
+
+  test "insert_all calls repo's insert_all method", %{conn: conn} do
+    assert Repo.insert_all(FakeModel, [name: "Bob"], conn: conn) ==
+             FakeRepo.insert_all(FakeModel, name: "Bob")
+  end
+
+  test "records time to call repo's insert_all method", %{conn: conn} do
+    {elapsed_time, sleep_time} =
+      :timer.tc(fn ->
+        {time, _, _} = Repo.insert_all(FakeModel, %{name: "Bob"}, conn: conn)
+        time
+      end)
+
+    [recorded_time | _] = get_metric_by_key({@transaction_name, {:db, "FakeModel.insert_all"}})
     assert_between(recorded_time, sleep_time, elapsed_time)
   end
 

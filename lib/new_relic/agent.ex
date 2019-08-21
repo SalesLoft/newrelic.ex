@@ -1,6 +1,5 @@
 defmodule NewRelic.Agent do
   @base_url "https://~s/agent_listener/invoke_raw_method?"
-  @agent_version "1.10.0"
 
   @doc """
   Connects to New Relic and sends the hopefully correctly
@@ -49,7 +48,7 @@ defmodule NewRelic.Agent do
         labels: [],
         utilization: NewRelic.Utils.utilization(),
         environment: NewRelic.Utils.elixir_environment(),
-        agent_version: @agent_version
+        agent_version: agent_version()
       }
     ]
   end
@@ -136,7 +135,7 @@ defmodule NewRelic.Agent do
       :post,
       [
         {"Content-Encoding", "identity"},
-        {"user-agent", "NewRelic-ElixirAgent/#{@agent_version}"}
+        {"user-agent", "NewRelic-ElixirAgent/#{agent_version()}"}
       ],
       body,
       5000
@@ -166,4 +165,8 @@ defmodule NewRelic.Agent do
   end
 
   defp url_var({key, value}), do: [to_string(key), "=", to_string(value)]
+
+  defp agent_version() do
+    Application.get_env(:new_relic, :agent_version, "1.10.0")
+  end
 end

@@ -23,14 +23,17 @@ defmodule NewRelic.Plug.Phoenix do
     opts
   end
 
-  def call(conn, _config) do
+  def call(conn, nil), do: call(conn, [])
+
+  def call(conn, config) when is_list(config) do
     if NewRelic.configured? do
-      module = conn |> Phoenix.Controller.controller_module |> Module.split |> List.last
-      action = conn |> Phoenix.Controller.action_name |> Atom.to_string
-      transaction_name = "#{module}##{action}"
+      name_fn = Keyword.get(config, :transaction_name_fn, &generate_transaction_name/1)
+      transaction_name = name_fn.(conn)
+      transaction = NewRelic.Transaction.start(transaction_name)
+      NewRelic.TransactionStore.set(transaction)
 
       conn
-      |> Plug.Conn.put_private(:new_relixir_transaction, NewRelic.Transaction.start(transaction_name))
+      |> Plug.Conn.put_private(:new_relixir_transaction, transaction)
       |> Plug.Conn.register_before_send(fn conn ->
         NewRelic.Transaction.finish(Map.get(conn.private, :new_relixir_transaction))
 
@@ -39,5 +42,11 @@ defmodule NewRelic.Plug.Phoenix do
     else
       conn
     end
+  end
+
+  def generate_transaction_name(conn) do
+    module = conn |> Phoenix.Controller.controller_module |> Module.split |> List.last
+    action = conn |> Phoenix.Controller.action_name |> Atom.to_string
+    "#{module}##{action}"
   end
 end

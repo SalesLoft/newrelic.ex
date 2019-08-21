@@ -35,6 +35,12 @@ defmodule NewRelic.Plug.InstrumentationTest do
     assert_contains(get_metric_keys(), {@transaction_name, {:db, "TestQuery"}})
   end
 
+  test "instrument_db can utilize the process dictionary, rather than being passed a conn" do
+    NewRelic.TransactionStore.set(NewRelic.Transaction.start(@transaction_name))
+    Instrumentation.instrument_db(:foo, %Ecto.Query{}, [query: "TestQuery"], fn -> nil end)
+    assert_contains(get_metric_keys(), {@transaction_name, {:db, "TestQuery"}})
+  end
+
   test "instrument_db infers query name from instance of Ecto model and action name", %{
     conn: conn
   } do

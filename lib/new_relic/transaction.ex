@@ -49,6 +49,7 @@ defmodule NewRelic.Transaction do
   """
   @spec finish(t) :: :ok
   def finish(%__MODULE__{start_time: start_time} = transaction) do
+    NewRelic.TransactionStore.clear()
     end_time = :os.timestamp
     elapsed = :timer.now_diff(end_time, start_time)
 
@@ -68,6 +69,27 @@ defmodule NewRelic.Transaction do
 
   def record_db(%__MODULE__{} = transaction, query, elapsed) when is_binary(query) do
     record_value!(transaction, {:db, query}, elapsed)
+  end
+
+  @spec record_execution_time((() -> any()), atom(), atom() | bitstring()) :: any()
+  def record_execution_time(func, module, method) when is_function(func) and is_atom(module) do
+    {elapsed_time, result} = :timer.tc(func)
+
+    with transaction = %__MODULE__{} <- NewRelic.TransactionStore.get() do
+      record_value!(transaction, {module, method}, elapsed_time)
+    end
+
+    result
+  end
+
+  @spec record_custom_transaction((() -> any()), bitstring()) :: any()
+  def record_custom_transaction(func, transaction_name) when is_function(func) and is_bitstring(transaction_name) do
+    transaction = NewRelic.Transaction.start(transaction_name)
+    NewRelic.TransactionStore.set(transaction)
+    result = func.()
+    transaction = NewRelic.TransactionStore.get()
+    NewRelic.Transaction.finish(transaction)
+    result
   end
 
   defp record_value!(%__MODULE__{name: name}, data, elapsed) do

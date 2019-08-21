@@ -74,9 +74,25 @@ defmodule NewRelic.Plug.Instrumentation do
   end
 
   defp record(opts, elapsed) do
-    with {:ok, conn} <- Keyword.fetch(opts, :conn),
-         {:ok, transaction} <- Map.fetch(conn.private, :new_relixir_transaction),
+    with {:ok, transaction} <- get_transaction(opts),
       do: NewRelic.Transaction.record_db(transaction, get_query(opts), elapsed)
+  end
+
+  defp get_transaction(opts) do
+    with conn = %{} <- Keyword.get(opts, :conn, {:error, :missing_conn}),
+         transaction = %NewRelic.Transaction{} <- Map.get(conn.private, :new_relixir_transaction, {:error, :missing_transaction}) do
+           {:ok, transaction}
+         else
+           {:error, :missing_conn} -> get_transaction()
+           {:error, :missing_transaction} -> get_transaction()
+         end
+  end
+
+  defp get_transaction() do
+    case NewRelic.TransactionStore.get() do
+      nil -> nil
+      transaction = %NewRelic.Transaction{} -> {:ok, transaction}
+    end
   end
 
   defp get_query(opts) do
