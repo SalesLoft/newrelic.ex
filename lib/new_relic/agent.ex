@@ -122,7 +122,10 @@ defmodule NewRelic.Agent do
   end
 
   defp app_name() do
-    String.split(Application.get_env(:new_relic, :application_name), ";")
+    case Application.get_env(:new_relic, :application_name) do
+      nil -> [nil]
+      app -> String.split(app, ";")
+    end
   end
 
   defp license_key() do
