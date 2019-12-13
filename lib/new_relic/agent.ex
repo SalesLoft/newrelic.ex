@@ -121,7 +121,7 @@ defmodule NewRelic.Agent do
     :erlang.list_to_integer(char_list)
   end
 
-  defp app_name() do
+  def app_name() do
     case Application.get_env(:new_relic, :application_name) do
       nil -> [nil]
       app -> String.split(app, ";")
