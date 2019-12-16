@@ -44,7 +44,7 @@ defmodule NewRelic.Agent do
         language: "elixir",
         pid: l2i(:os.getpid()),
         host: l2b(hostname),
-        app_name: [app_name()],
+        app_name: app_name(),
         labels: [],
         utilization: NewRelic.Utils.utilization(),
         environment: NewRelic.Utils.elixir_environment(),
@@ -121,8 +121,11 @@ defmodule NewRelic.Agent do
     :erlang.list_to_integer(char_list)
   end
 
-  defp app_name() do
-    Application.get_env(:new_relic, :application_name)
+  def app_name() do
+    case Application.get_env(:new_relic, :application_name) do
+      nil -> [nil]
+      app -> String.split(app, ";")
+    end
   end
 
   defp license_key() do
