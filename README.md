@@ -1,3 +1,7 @@
+# Deprecated
+
+Use the [official library](https://github.com/newrelic/elixir_agent) now instead of this one.
+
 # NewRelic agent for Elixir
 
 [![Build Status](https://travis-ci.org/romul/newrelic.ex.svg?branch=master)](https://travis-ci.org/romul/newrelic.ex)
